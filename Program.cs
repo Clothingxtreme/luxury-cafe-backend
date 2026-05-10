@@ -55,9 +55,16 @@ var app = builder.Build();
 
 // ── Seed admin account on startup ──────────────────────────────────────────
 var authService = app.Services.GetRequiredService<AuthService>();
-await authService.SeedAdminAsync(
-    app.Configuration["Admin:Email"] ?? "abizmichelle@gmail.com",
-    app.Configuration["Admin:Password"] ?? "Bisola1369");
+try
+{
+    await authService.SeedAdminAsync(
+        app.Configuration["Admin:Email"] ?? "abizmichelle@gmail.com",
+        app.Configuration["Admin:Password"] ?? "Bisola1369");
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Admin seed skipped: unable to connect to MongoDB during startup.");
+}
 
 app.UseCors("Frontend");
 app.UseAuthentication();
