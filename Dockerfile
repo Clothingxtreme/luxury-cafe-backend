@@ -12,6 +12,11 @@ RUN dotnet publish "MaisonGlace.API.csproj" -c Release -o /app/publish /p:UseApp
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends ca-certificates openssl \
+	&& update-ca-certificates \
+	&& rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/publish .
 
 # Render injects PORT at runtime; default 8080 for local testing

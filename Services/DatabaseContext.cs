@@ -12,13 +12,15 @@ public class DatabaseContext
 
     public DatabaseContext(IOptions<MongoDbSettings> options)
     {
-        var mongoSettings = MongoClientSettings.FromConnectionString(options.Value.ConnectionString);
+        var cfg = options.Value;
+        var mongoSettings = MongoClientSettings.FromConnectionString(cfg.ConnectionString);
         mongoSettings.SslSettings = new SslSettings
         {
             EnabledSslProtocols = SslProtocols.Tls12
         };
+        mongoSettings.AllowInsecureTls = cfg.AllowInsecureTls;
 
-        var mongoUrl = MongoUrl.Create(options.Value.ConnectionString);
+        var mongoUrl = MongoUrl.Create(cfg.ConnectionString);
         var client = new MongoClient(mongoSettings);
         _database = client.GetDatabase(mongoUrl.DatabaseName);
     }
