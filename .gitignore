@@ -1,0 +1,27 @@
+# Secrets — never commit environment-specific config
+appsettings.Development.json
+
+
+
+# .NET build output
+bin/
+obj/
+
+# Visual Studio / Rider IDE files
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# User secrets (dotnet user-secrets)
+secrets.json
+
+# Publish output
+publish/
+out/
+
+# Logs
+*.log
+logs/
