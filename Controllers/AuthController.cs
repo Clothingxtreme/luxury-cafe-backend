@@ -9,8 +9,13 @@ namespace MaisonGlace.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _auth;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(AuthService auth) => _auth = auth;
+    public AuthController(AuthService auth, ILogger<AuthController> logger)
+    {
+        _auth = auth;
+        _logger = logger;
+    }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -18,10 +23,24 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             return BadRequest(new { message = "Email and password are required." });
 
-        var token = await _auth.LoginAsync(request.Email, request.Password);
+        string? token;
+        try
+        {
+            token = await _auth.LoginAsync(request.Email, request.Password);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Auth login failed due to backend dependency. Email: {Email}", request.Email);
+            return StatusCode(503, new { message = "Auth service unavailable" });
+        }
 
         if (token is null)
+        {
+            _logger.LogWarning("Auth login denied. Email: {Email}", request.Email);
             return Unauthorized(new { message = "Invalid email or password." });
+        }
+
+        _logger.LogInformation("Auth login success. Email: {Email}", request.Email);
 
         return Ok(new LoginResponse
         {
