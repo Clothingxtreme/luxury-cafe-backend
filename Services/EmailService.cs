@@ -3,16 +3,19 @@ using MimeKit;
 using MaisonGlace.API.Models;
 using MaisonGlace.API.Settings;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace MaisonGlace.API.Services;
 
 public class EmailService
 {
     private readonly EmailSettings _settings;
+  private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IOptions<EmailSettings> settings)
+  public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger)
     {
         _settings = settings.Value;
+    _logger = logger;
     }
 
     public async Task SendBookingConfirmationAsync(Booking booking)
@@ -33,6 +36,13 @@ public class EmailService
 
     private async Task SendAsync(string toEmail, string toName, string subject, string htmlBody)
     {
+      _logger.LogInformation(
+        "Sending email. To: {ToEmail}; Subject: {Subject}; Host: {Host}; Port: {Port}",
+        toEmail,
+        subject,
+        _settings.SmtpHost,
+        _settings.SmtpPort);
+
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_settings.FromName, _settings.Username));
         message.To.Add(new MailboxAddress(toName, toEmail));
@@ -47,6 +57,8 @@ public class EmailService
         await client.AuthenticateAsync(_settings.Username, _settings.Password);
         await client.SendAsync(message);
         await client.DisconnectAsync(true);
+
+        _logger.LogInformation("Email sent successfully. To: {ToEmail}; Subject: {Subject}", toEmail, subject);
     }
 
     private static string SeatLabel(string seatType) => seatType switch

@@ -36,8 +36,8 @@ public class BookingsController : ControllerBase
 
         var created = await _bookings.CreateAsync(booking);
 
-        // Fire-and-forget — email failures must not break the response
-        _ = SendEmailsAsync(created);
+        // Await email attempts so delivery work is not lost when the request completes.
+        await SendEmailsAsync(created);
 
         return Ok(new { success = true, booking = created });
     }
