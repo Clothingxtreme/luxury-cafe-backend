@@ -79,6 +79,17 @@ app.Logger.LogInformation("Startup environment: {Environment}", envName);
 app.Logger.LogInformation("Mongo configured: {MongoConfigured}; target: {MongoTarget}", mongoConfigured, mongoTarget);
 app.Logger.LogInformation("AllowedOrigins: {AllowedOrigins}", string.Join(",", allowedOrigins));
 
+var dbContext = app.Services.GetRequiredService<DatabaseContext>();
+try
+{
+    await dbContext.PingAsync();
+    app.Logger.LogInformation("MongoDB ping succeeded during startup.");
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "MongoDB ping failed during startup.");
+}
+
 // ── Seed admin account on startup ──────────────────────────────────────────
 var authService = app.Services.GetRequiredService<AuthService>();
 try
@@ -113,7 +124,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/healthz", () => Results.Ok(new { status = "ok", utc = DateTime.UtcNow }));
+async Task<IResult> HealthCheck(DatabaseContext databaseContext, CancellationToken cancellationToken)
+{
+    try
+    {
+        await databaseContext.PingAsync(cancellationToken);
+        return Results.Ok(new { status = "ok", database = "ok", utc = DateTime.UtcNow });
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Health check MongoDB ping failed.");
+        return Results.Problem(statusCode: 503, title: "Database unavailable", detail: "MongoDB ping failed.");
+    }
+}
+
+app.MapGet("/health", HealthCheck);
+app.MapGet("/healthz", HealthCheck);
 
 // Render.com sets the PORT env var; fall back to 8080 for local Docker
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
