@@ -14,10 +14,18 @@ public class DatabaseContext
     {
         var cfg = options.Value;
         var mongoSettings = MongoClientSettings.FromConnectionString(cfg.ConnectionString);
-        mongoSettings.SslSettings = new SslSettings
+        var sslSettings = new SslSettings
         {
-            EnabledSslProtocols = SslProtocols.Tls12
+            EnabledSslProtocols = SslProtocols.Tls12,
+            CheckCertificateRevocation = false
         };
+
+        if (cfg.AllowInsecureTls)
+        {
+            sslSettings.ServerCertificateValidationCallback = (_, _, _, _) => true;
+        }
+
+        mongoSettings.SslSettings = sslSettings;
         mongoSettings.AllowInsecureTls = cfg.AllowInsecureTls;
 
         var mongoUrl = MongoUrl.Create(cfg.ConnectionString);

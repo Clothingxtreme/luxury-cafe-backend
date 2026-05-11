@@ -51,3 +51,5 @@ C:\Users\User\Downloads\luxury-cafe-ui\Backend\obj\Debug\net8.0\refint\MaisonGla
 C:\Users\User\Downloads\luxury-cafe-ui\Backend\obj\Debug\net8.0\MaisonGlace.API.pdb
 C:\Users\User\Downloads\luxury-cafe-ui\Backend\obj\Debug\net8.0\MaisonGlace.API.genruntimeconfig.cache
 C:\Users\User\Downloads\luxury-cafe-ui\Backend\obj\Debug\net8.0\ref\MaisonGlace.API.dll
+C:\Users\User\Downloads\luxury-cafe-ui\Backend\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\User\Downloads\luxury-cafe-ui\Backend\obj\Debug\net8.0\MaisonGlace.API.sourcelink.json
